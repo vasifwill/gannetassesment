@@ -1,0 +1,248 @@
+<!doctype html>
+<head>
+    <link href='https://fonts.googleapis.com/css?family=Roboto Mono' rel='stylesheet'>
+    <meta charset="utf-8">
+    <title>Let it snow!</title>
+</head>
+<body>
+    <style>
+        .ad-970x250 {
+            border: 1px solid #000000;
+            display: block;
+            height: 250px;
+            overflow: hidden;
+            position: relative;
+            width: 970px;
+            
+        }
+        .landscape {
+            background: #d9e4ed;
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+        }
+        .overlay {
+            position: absolute;
+            inset: 0;
+            background-color: rgba(0,0,0,0.8);
+            display: grid;
+            place-items: center;
+            transition: all 1s ease;
+        }
+        .background-mountain {
+            bottom: 0;
+            display: block;
+            height: 240px;
+            left: 0;
+            margin: 0 auto;
+            opacity: 1;
+            position: absolute;
+            white-space: nowrap;
+            z-index: 1;
+        }
+        .background-mountain img {
+            height: 100%;
+        }
+        .background-hills {
+            bottom: 0;
+            display: block;
+            height: 200px;
+            left: 0;
+            margin: 0 auto;
+            opacity: 1;
+            position: absolute;
+            white-space: nowrap;
+            z-index: 1;
+        }
+        .background-hills img {
+            height: 100%;
+        }
+        .background-city {
+            bottom: 0;
+            display: block;
+            height: 225px;
+            left: 0;
+            margin: 0 auto;
+            opacity: 1;
+            position: absolute;
+            white-space: nowrap;
+            z-index: 1;
+        }
+
+        .background-city img {
+            height: 100%;
+        }
+        .animate .parallax .background-mountain {
+            animation: parallax 600s linear infinite;
+        }
+        .animate .parallax .background-hills {
+            animation: parallax 400s linear infinite;
+        }
+        .animate .parallax .background-city {
+            animation: parallax 300s linear infinite;
+        }
+
+       
+        @keyframes parallax {
+            from {
+                left: 0;
+            }
+            to {
+                left: -970px;
+            }
+        }
+        
+        .logo{
+            display: block;
+            position: absolute;
+            bottom:20px;
+            left:20px;
+            width: 100px;
+            z-index: 10;
+            filter:  brightness(0) invert(1);
+        }
+
+        .forcast{
+            display: block;
+            position: absolute;
+            bottom:24px;
+            right:24px;
+            z-index: 10;
+            color: white;
+            font-family:'Roboto Mono';
+        }
+
+        .button{
+            display: block;
+            /* position: absolute; */
+            width: 75px;
+            height: 75px;
+            /* z-index: 10; */
+            /* align-items: center;
+            left: 50%;
+            top: 50%; */
+            border: none;
+            background: transparent;
+            color: white;
+            /* opacity: 0.5; */
+            transition: 0.5s;
+            cursor:pointer;
+        }
+        .button svg {
+            fill: currentColor;
+        }
+
+        .button:hover{opacity: 0.5; }
+        
+        .animate .overlay {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #snowflakes {
+            opacity: 0;
+            position: absolute;
+            inset: 0;
+        }
+
+        .animate #snowflakes {
+            opacity: 1;
+        }
+    </style>
+
+    <section class="ad-970x250" id="animation">
+        <div class="landscape parallax">   
+            <div class="background-mountain">
+                <img src="images/mountain.png" />
+                <img src="images/mountain.png" />
+            </div>
+            <div class="background-hills">
+                <img src="images/hills.png" />
+                <img src="images/hills.png" />
+            </div>
+            <div class="background-city">
+                <img src="images/city.png" />
+                <img src="images/city.png" />
+            </div> 
+        </div>
+        <canvas width="970" height="250" id="snowflakes"></canvas>
+        
+        <div class="overlay">
+            <button class="button" onclick="startAnimation()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M512 256c0 141.4-114.6 256-256 256S0 397.4 0 256S114.6 0 256 0S512 114.6 512 256zM188.3 147.1c-7.6 4.2-12.3 12.3-12.3 20.9V344c0 8.7 4.7 16.7 12.3 20.9s16.8 4.1 24.3-.5l144-88c7.1-4.4 11.5-12.1 11.5-20.5s-4.4-16.1-11.5-20.5l-144-88c-7.4-4.5-16.7-4.7-24.3-.5z"/></svg>
+            </button>
+        </div>
+
+        <a href="https://www.denver.org/"  class="logo" target="blank">
+            <img  src='images/logo.svg' alt='Denver logo' />
+        </a>
+        <div id="forcast" class="forcast"></div>
+    </section>
+    
+
+    <script>
+        var dt = new Date();
+        var hours = dt.getHours()
+        var min = dt.getMinutes()
+       setInterval(min,60000)  
+       fetch('https://api.weather.gov/gridpoints/BOU/62,61/forecast')
+	.then(response => response.json())
+	.then(response => document.getElementById("forcast").innerHTML = response.properties.periods[0].temperature+"F' " + hours+":"+min)
+	.catch(err => console.error(err));
+    </script>
+        
+    <script type="text/javascript">
+    /**
+     * Play button should start the following
+     *   • Overlay should fade out
+     *   • Parallax should start animating
+     *   • Snow should fall
+     *   • Time should display in lower right corner (update on the minute)
+     */
+        function startAnimation() {
+            const animation = document.getElementById("animation");
+            animation.classList.add("animate");
+            beginSnowflakeAnimation();
+        }
+
+        function beginSnowflakeAnimation() {
+            const canvas = document.getElementById("snowflakes");
+            const bounds = canvas.getBoundingClientRect(); //providing information about the size of an element and its position for "viewport"
+            const context = canvas.getContext("2d"); //returns a drawing context on the canvas 2 dimensional x/y
+            const count = 8;
+            const size = 10;
+            const maxSpeed = 10;
+
+            const coords = [];
+            const image = new Image();
+            for (let i = 0; i < count; i++) {
+                const x = (bounds.width / count) * i //it helps x position will not be same for each star
+                const y = Math.floor(Math.random() * -bounds.height);// randomly choosing y position
+                const speed = Math.ceil(Math.random() * maxSpeed);//it is just numbers for speed
+                coords.push({x, y, size, speed})
+            }
+            image.onload = function() { //handler invoked when an image finishes loading
+                animate(context, coords, image, bounds); 
+            }
+
+            image.src = "images/snowflake.svg";
+        }
+
+        function animate(context, coords, image, bounds) {
+            context.clearRect(0, 0, bounds.width, bounds.height); //method sets the pixels in a rectangular area to transparent black
+
+            coords.forEach(({x,y,size,speed}, index) => {
+                context.drawImage(image, x, y, size, size);
+                coords[index].y += speed;
+
+                if (y > bounds.height) {
+                    coords[index].y = -size;
+                }
+            });
+
+            requestAnimationFrame(() => animate(context, coords, image, bounds)); // function to update an animation before the next repaint. The method takes a callback as an argument to be invoked before the repaint.
+        }
+    </script>
+</body>
+
+</html>
